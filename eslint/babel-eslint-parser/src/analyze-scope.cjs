@@ -67,10 +67,22 @@ class PatternVisitor extends OriginalPatternVisitor {
 
 class Referencer extends OriginalReferencer {
   #client;
+  visitedTopLevel = false;
 
   constructor(options, scopeManager, client) {
     super(options, scopeManager);
     this.#client = client;
+  }
+
+  Program(node) {
+    if (!this.visitedTopLevel) {
+      this.visitedTopLevel = true;
+      super.Program(node);
+    } else {
+      this.scopeManager.__nestModuleScope(node);
+      this.visitChildren(node);
+      this.close(node);
+    }
   }
 
   // inherits.
